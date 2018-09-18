@@ -63,7 +63,7 @@ architecture Behavioral of ALU8bit is
     signal add_carry_i   : std_logic := '0';
 
     
-    -- we use a sepate module for the addition/subtraction
+    -- we use a separate module for the addition/subtraction
     component ADD is
     generic(
         C_DATA_WIDTH : natural := 4
@@ -120,7 +120,7 @@ begin
     Z <= result_i;                    
     
     -- TODO: control the flags
-    -- carry flag
+    -- carry flag: 1 carry flag for SUB, ADD, RR and RL (based on op)
     --   don't forget that rotate left/right can also produce a carry
     --   you might need some extra signals
     cf <= ... ;
