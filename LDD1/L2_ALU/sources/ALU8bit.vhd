@@ -78,7 +78,7 @@ architecture Behavioral of ALU8bit is
     end component;
 begin
     
-    -- TODO: the following lines to perform logical operations
+    -- TODO: complete the following lines to perform logical operations
     -- implementation of some operations
     -- and
     and_result_i <= ... ;
