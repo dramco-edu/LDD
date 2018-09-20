@@ -86,7 +86,7 @@ architecture Behavioral of ALU_tb is
     end component;
    
        --debug information
-    type debug_t is (reseting, paused, OP_NOT,  OP_AND , OP_OR   , OP_XOR, OP_ADD_NC, OP_ADD_NC2, OP_ADD_C , OP_SUB_NC, OP_SUB_C , OP_CMP_EQ, OP_CMP_ST, 
+    type debug_t is (resetting, paused, OP_NOT,  OP_AND , OP_OR   , OP_XOR, OP_ADD_NC, OP_ADD_NC2, OP_ADD_C , OP_SUB_NC, OP_SUB_C , OP_CMP_EQ, OP_CMP_ST, 
         OP_CMP_GT, OP_RR_C, OP_RR_NC, OP_RL_C, OP_RL_NC, OP_SWAP, ended);
     signal debug : debug_t;
     
