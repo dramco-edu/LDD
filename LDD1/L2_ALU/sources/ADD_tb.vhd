@@ -127,7 +127,7 @@ begin
             writeline (output, s);
         end if;
             
-        -- add (no carry)
+        -- add (with carry)
         wait for 10 ns;
         debug <= ADD_C;
         a <= x"7";
