@@ -73,7 +73,7 @@ architecture Behavioral of ADD_tb is
     end component;
    
        --debug information
-    type debug_t is (reseting, paused, ADD_NC, ADD_NC2, ADD_C, ended);
+    type debug_t is (reseting, paused, ADD_NC, ADD_NC2, ADD_C1, ADD_C2, ended);
     signal debug : debug_t;
     
 begin
