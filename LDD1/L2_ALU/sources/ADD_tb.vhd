@@ -94,7 +94,7 @@ begin
         variable s : line;
     begin
     
-        -- addition (no carry)
+        -- test 1
         wait for 10 ns;
         debug <= ADD_NC;
         a <= x"3";
@@ -111,7 +111,7 @@ begin
             writeline (output, s);
         end if;
     
-        -- addition with carry in (no carry)
+        -- test 2
         wait for 10 ns;
         debug <= ADD_NC2;
         carry_in <= '1';
@@ -127,11 +127,12 @@ begin
             writeline (output, s);
         end if;
             
-        -- add (with carry)
+        -- test 3
         wait for 10 ns;
-        debug <= ADD_C;
-        a <= x"7";
-        b <= x"8";
+        debug <= ADD_C1;
+        carry_in <= '0';
+        a <= x"C";
+        b <= x"4";
         wait for 1 ns;
         wait for 1 ns;
         assert result = x"0"
@@ -143,7 +144,26 @@ begin
         if (result = x"0") and (carry_out = '1') then
             write (s, string'("SUCCESS: ADD with carry."));
             writeline (output, s);
-        end if;     
+        end if;
+                   
+        -- test 4
+        wait for 10 ns;
+        debug <= ADD_C2;
+        carry_in <= '1';
+        a <= x"7";
+        b <= x"8";
+        wait for 1 ns;
+        wait for 1 ns;
+        assert result = x"0"
+            report "ADD+carry_in with carry failed (result)"
+            severity ERROR;
+        assert carry_out = '1'
+            report "ADD+carry_in with carry failed (carry_out)"
+            severity ERROR; 
+        if (result = x"0") and (carry_out = '1') then
+            write (s, string'("SUCCESS: ADD+carry_in with carry."));
+            writeline (output, s);
+        end if;    
         
         -- end simulation           
         wait for 10 ns;
