@@ -180,11 +180,11 @@ begin
         debug <= down_uf;
         down <= '1';
         t := now;
-        write (s, string'("Testing count down with undeflow ..."));
+        write (s, string'("Testing count down with underflow ..."));
         writeline (output, s); 
         wait until underflow='1';
         assert now-t = FULL_COUNT_TIME+clk_period/2
-            report "Time to count down to undeflow incorrect, check sequences " & cr & time'image(now-t)
+            report "Time to count down to underflow incorrect, check sequences " & cr & time'image(now-t)
             severity error;
         assert overflow='0'
             report "Overflow should not be set."
@@ -193,6 +193,22 @@ begin
         down <= '0';
         wait for clk_period;
         
+         --synchronise to falling edge
+        debug <= paused;
+        wait until falling_edge(clk);
+        
+        -- count 1 up so we get rid of underflow
+        debug <= up_nof;
+        up <= '1';
+        wait for clk_period;
+        up <= '0';
+        assert underflow='0'
+            report "Underflow/overflow should not be set."
+            severity error;
+        assert overflow='0'
+            report "Overflow should not be set."
+            severity error;
+               
         -- end simulation
         debug <= ended;
         wait for clk_period*4;
