@@ -60,12 +60,12 @@ architecture Behavioral of debounce_tb is
         if expecting_output = true then
             --if interrupt is expected test if it's here
             assert result = '1'      
-                report "result incorrect should be active"
+                report "result incorrect should be 'high'"
                 severity ERROR;
         else
             --no interrupt should have happen, meaning timeout should have been reached.
             assert result = '0'
-                report "result incorrect should not be active"
+                report "result incorrect should be 'low'"
                  severity ERROR;
         end if;
     end procedure check_output;
