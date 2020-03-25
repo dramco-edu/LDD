@@ -63,7 +63,12 @@ architecture Behavioral of peripheral_address_decoder is
 
 begin
 
-	-- design check
+	-- some design checks
+	-- make sure mask and address have the same length
+	assert C_ADDR_MASK'length = addr'length
+		report "C_ADDR_MASK and addr need to have the same length."
+		severity ERROR;
+	-- make sure the C_PERI_ADDR_WIDTH lowest bits of C_BASE_ADDR are 0
 	assert C_BASE_ADDR and (not C_ADDR_MASK) = (C_ADDR_MASK'range=>'0')
 		report "Wrong C_BASE_ADDR. C_PERI_ADDR_WIDTH lowest bits should be 0."
 		severity ERROR;
