@@ -60,7 +60,14 @@ architecture Behavioral of peripheral_address_decoder is
     
     -- internal counterpart of addr input
     signal addr_i : std_logic_vector(addr'length-1 downto 0) := (others=>'0');
+
 begin
+
+	-- design check
+	assert C_BASE_ADDR and (not C_ADDR_MASK) = (C_ADDR_MASK'range=>'0')
+		report "Wrong C_BASE_ADDR. C_PERI_ADDR_WIDTH lowest bits should be 0."
+		severity ERROR;
+
     -- this avoids compiler errors about indexing
     addr_i <= addr;
     
