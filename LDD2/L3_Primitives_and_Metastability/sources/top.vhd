@@ -89,8 +89,7 @@ architecture Behavioral of top is
     component ring_oscillator is
     port(
          nEnable : in  std_logic;
-         clk_out : out std_logic;
-        meta_out : out std_logic
+         clk_out : out std_logic
     );
     end component ring_oscillator;
 
@@ -123,8 +122,7 @@ begin
     ASYNC_CLK : ring_oscillator
     port map(
          nEnable => sw(0),
-         clk_out => ring_clk_i,
-        meta_out => meta_out
+         clk_out => ring_clk_i
     );
 
     ring_clk <= ring_clk_i;
