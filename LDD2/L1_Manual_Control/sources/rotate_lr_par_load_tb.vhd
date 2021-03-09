@@ -2,7 +2,7 @@
 -- Company: DRAMCO -- KU Leuven
 -- Engineer: Sylvain Ieri, Geoffrey Ottoy
 -- 
--- Module Name: lr_shift_par_load_tb - Behavioral
+-- Module Name: rotate_lr_par_load_tb - Behavioral
 -- Course Name: Lab Digital Design
 -- 
 -- Description: 
@@ -29,10 +29,10 @@ use IEEE.STD_LOGIC_1164.ALL;
 library STD;
 use STD.TEXTIO.ALL;
 
-entity lr_shift_par_load_tb is
-end lr_shift_par_load_tb;
+entity rotate_lr_par_load_tb is
+end rotate_lr_par_load_tb;
 
-architecture Behavioral of lr_shift_par_load_tb is
+architecture Behavioral of rotate_lr_par_load_tb is
         
     constant C_F_CLK : natural := 100000000; -- 100 MHz
     constant clk_period : time := (1000000000/C_F_CLK) *1ns;
@@ -48,9 +48,8 @@ architecture Behavioral of lr_shift_par_load_tb is
 
     -- uut outputs
     signal par_out : std_logic_vector(C_REG_WIDTH-1 downto 0);
-    
         
-    component lr_shift_par_load is
+    component rotate_lr_par_load is
     generic(
         C_REG_WIDTH : natural := 8
     );
@@ -65,9 +64,16 @@ architecture Behavioral of lr_shift_par_load_tb is
     );
     end component;
 
+    procedure sim_message(msg : string) is 
+        variable s : line;
+    begin
+        write (s, msg);
+        writeline (output, s);
+    end procedure;
+
 begin
 
-    UUT : lr_shift_par_load
+    UUT : rotate_lr_par_load
     generic map(
        C_REG_WIDTH => C_REG_WIDTH
     )
@@ -90,20 +96,22 @@ begin
     end process CLK_PROC;
     
     STIM_PROC: process
-        variable s : line;
+        variable sim_error : boolean := false;
     begin
     
-        write (s, string'("Power-on reset."));
-        writeline (output, s);
+        sim_message("Power-on reset.");
         
         wait for clk_period;
         assert par_out = x"0"
             report "wrong output value (power-on)"
             severity WARNING;
+        if par_out = x"0" then
+            sim_message("SUCCESS");
+        end if;
+        sim_message("");
         
         -- test load
-        write (s, string'("Parallel load test."));
-        writeline (output, s);
+        sim_message("Parallel load test.");
         par_in <= x"3";
         wait until falling_edge(clk);
         le <= '1';
@@ -112,68 +120,104 @@ begin
         assert par_out = x"3"
             report "wrong output value (load)"
             severity ERROR;
+        if par_out = x"3" then
+            sim_message("SUCCESS");
+        end if;
+        sim_message("");
         
         wait for clk_period;
         wait until falling_edge(clk);
         
         -- test left shift
-        write (s, string'("Shift left test."));
-        writeline (output, s);
+        sim_message("Shift left test.");
         left <= '1';
         wait for clk_period;
         assert par_out = x"6"
             report "wrong output value (shift left)"
             severity ERROR;
+        if not(par_out = x"6") then
+            sim_error := true;
+        end if;
         wait for clk_period;
         assert par_out = x"C"
             report "wrong output value (shift left)"
             severity ERROR;
+        if not(par_out = x"C") then
+            sim_error := true;
+        end if;
         wait for clk_period;
         left <= '0';
         assert par_out = x"9"
             report "wrong output value (shift left)"
             severity ERROR;
-       
+        if not(par_out = x"9") then
+            sim_error := true;
+        end if;
+        if not sim_error then
+            sim_message("SUCCESS");
+        end if;
+        sim_message("");
+        sim_error := false;
+        
         wait for clk_period;
         wait until falling_edge(clk);
        
         -- test right shift
-        write (s, string'("Shift right test."));
-        writeline (output, s);
+        sim_message("Shift right test.");
         right <= '1';
         wait for clk_period;
         assert par_out = x"C"
             report "wrong output value (shift left)"
             severity ERROR;
+        if not(par_out = x"C") then
+            sim_error := true;
+        end if;
         wait for clk_period;
         assert par_out = x"6"
             report "wrong output value (shift left)"
             severity ERROR;
+        if not(par_out = x"6") then
+            sim_error := true;
+        end if;
         wait for clk_period;
         assert par_out = x"3"
             report "wrong output value (shift left)"
             severity ERROR;
+        if not(par_out = x"3") then
+            sim_error := true;
+        end if;
+        if not sim_error then
+            sim_message("SUCCESS");
+        end if;
+        sim_message("");
+        sim_error := false;
         
         -- test priority
-        write (s, string'("Priority test."));
-        writeline (output, s);
+        sim_message("Priority test.");
         le <= '1';
         par_in <= x"5";
         wait for clk_period;
         assert par_out = x"5"
-            report "wrong output value (load has priotity)"
+            report "wrong output value (load has priority)"
             severity ERROR;
-                
+        if par_out = x"5" then
+            sim_message("SUCCESS");
+        end if;
+        sim_message("");
+                    
         -- test async reset
-        write (s, string'("Async reset test."));
-        writeline (output, s); 
+        sim_message("Async reset test.");
         reset <= '1';
         wait for 1 ns;
         reset <= '0';
         assert par_out = x"0"
             report "Reset failed"
             severity error;
-        
+       if par_out = x"0" then
+            sim_message("SUCCESS");
+        end if;
+        sim_message("");
+         
         -- the end
         assert false
             report "SIMULATION ENDED"
@@ -183,3 +227,4 @@ begin
             
     end process STIM_PROC;
 end Behavioral;
+

@@ -2,7 +2,7 @@
 -- Institution: KU Leuven
 -- Students: firstname lastname and other guy/girl/...
 -- 
--- Module Name: lr_shift_par_load - Behavioral
+-- Module Name: rotate_lr_par_load - Behavioral
 -- Course Name: Lab Digital Design
 --
 -- Description: 
@@ -24,7 +24,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 --library UNISIM;
 --use UNISIM.VComponents.all;
 
-entity lr_shift_par_load is
+entity rotate_lr_par_load is
     generic(
         C_REG_WIDTH : natural := 8
     );
@@ -37,9 +37,9 @@ entity lr_shift_par_load is
          par_in : in  STD_LOGIC_VECTOR(C_REG_WIDTH-1 downto 0);
         par_out : out STD_LOGIC_VECTOR(C_REG_WIDTH-1 downto 0)
     );
-end lr_shift_par_load;
+end rotate_lr_par_load;
 
-architecture Behavioral of lr_shift_par_load is
+architecture Behavioral of rotate_lr_par_load is
 
     signal reg_i : std_logic_vector(C_REG_WIDTH-1 downto 0) := (others=>'0');
 

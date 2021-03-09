@@ -53,7 +53,7 @@ architecture Behavioral of top is
     signal right_i : std_logic := '0';
     signal le_i : std_logic := '0';
     
-    component lr_shift_par_load is
+    component rotate_lr_par_load is
     generic(
         C_REG_WIDTH : natural := 8
     );
@@ -95,7 +95,7 @@ begin
     );
 
     -- Shift register
-    SR_INST : lr_shift_par_load
+    SR_INST : rotate_lr_par_load
     generic map(
            C_REG_WIDTH => C_NR_LEDS
     )
