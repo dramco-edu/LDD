@@ -255,63 +255,63 @@ architecture Behavioral of IO is
        );
     end component;
 
-    component uart_peripheral IS
-        GENERIC( 
-            C_ADDR_BASE : std_logic_vector := x"F0"; 
-            C_DATA_BUS_WIDTH : natural := 8;
-            
-            txFifoDepth : positive := 8;
-            rxFifoDepth : positive := 1
-        );
-        PORT( 
-            
-            clk : in  std_logic;
-            reset : in  std_logic;
-            
-            --bus access
-            addr : in std_logic_vector (C_ADDR_BASE'range);
-            data_in : in  std_logic_vector(C_DATA_BUS_WIDTH-1 downto 0);
-            data_out : out std_logic_vector(C_DATA_BUS_WIDTH-1 downto 0);
-            read_en : in std_logic;
-            write_en : in std_logic;
-            
-            ready : out std_logic;
-            read_en_peri : out std_logic;
-            write_en_peri : out std_logic;
-            
-            irq : out std_logic;
-            
-            --extenral
-            TxD : out std_logic;
-            RxD : in std_logic
-    );
-    end component ;
+--    component uart_peripheral IS
+--        GENERIC( 
+--            C_ADDR_BASE : std_logic_vector := x"F0"; 
+--            C_DATA_BUS_WIDTH : natural := 8;
+--            
+--            txFifoDepth : positive := 8;
+--            rxFifoDepth : positive := 1
+--        );
+--        PORT( 
+--            
+--            clk : in  std_logic;
+--            reset : in  std_logic;
+--            
+--            --bus access
+--            addr : in std_logic_vector (C_ADDR_BASE'range);
+--            data_in : in  std_logic_vector(C_DATA_BUS_WIDTH-1 downto 0);
+--            data_out : out std_logic_vector(C_DATA_BUS_WIDTH-1 downto 0);
+--            read_en : in std_logic;
+--            write_en : in std_logic;
+--            
+--            ready : out std_logic;
+--            read_en_peri : out std_logic;
+--            write_en_peri : out std_logic;
+--            
+--            irq : out std_logic;
+--            
+--            --extenral
+--            TxD : out std_logic;
+--            RxD : in std_logic
+--    );
+--    end component ;
     
-    component crc_calculator is
-        generic(
-            C_ADDR_BASE : std_logic_vector := x"F0"; 
-            
-            C_DATA_BUS_WIDTH : natural := 8;
-            C_CRC_BIT_COUNT : natural := 8
-    
-        );
-        port(
-        
-            clk : in  std_logic;
-            reset : in  std_logic;
-            
-            --bus access
-            addr : in std_logic_vector (C_ADDR_BASE'range);
-            data_in : in  std_logic_vector(C_DATA_BUS_WIDTH-1 downto 0);
-            data_out : out std_logic_vector(C_DATA_BUS_WIDTH-1 downto 0);
-            read_en : in std_logic;
-            write_en : in std_logic;
-            ready : out std_logic;
-            
-            read_en_peri : out std_logic;
-            write_en_peri : out std_logic
-        );
-    end component;
+--    component crc_calculator is
+--        generic(
+--            C_ADDR_BASE : std_logic_vector := x"F0"; 
+--            
+--            C_DATA_BUS_WIDTH : natural := 8;
+--            C_CRC_BIT_COUNT : natural := 8
+--    
+--        );
+--        port(
+--        
+--            clk : in  std_logic;
+--            reset : in  std_logic;
+--            
+--            --bus access
+--            addr : in std_logic_vector (C_ADDR_BASE'range);
+--            data_in : in  std_logic_vector(C_DATA_BUS_WIDTH-1 downto 0);
+--            data_out : out std_logic_vector(C_DATA_BUS_WIDTH-1 downto 0);
+--            read_en : in std_logic;
+--            write_en : in std_logic;
+--            ready : out std_logic;
+--            
+--            read_en_peri : out std_logic;
+--            write_en_peri : out std_logic
+--        );
+--    end component;
 
 begin
 
