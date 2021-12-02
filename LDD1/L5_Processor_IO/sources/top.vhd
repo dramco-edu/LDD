@@ -36,7 +36,10 @@ entity top is
                btnD : in    std_logic;
                 led : out   std_logic_vector(15 downto 0);
                 seg : out   std_logic_vector(6 downto 0);
-                 an : out   std_logic_vector(7 downto 0)
+                 an : out   std_logic_vector(7 downto 0);
+           RGB1_Red : out   std_logic;
+         RGB1_Green : out   std_logic;
+          RGB1_Blue : out   std_logic
     );
 end top;
 
@@ -57,6 +60,7 @@ architecture Behavioral of top is
     signal sw_i : std_logic_vector(C_NR_SW-1 downto 0) := (others=>'0');
     signal seg_i : std_logic_vector(6 downto 0) := (others=>'0');
     signal an_i : std_logic_vector(3 downto 0) := (others=>'0');
+    signal rgb_i : std_logic_vector(2 downto 0) := (others=>'0');
     
     signal address_bus_i : std_logic_vector(C_ADDR_WIDTH-1 downto 0) := (others=>'0');
     signal data_bus_processor_out_i : std_logic_vector(C_DATA_WIDTH-1 downto 0) := (others=>'0');
@@ -155,7 +159,8 @@ architecture Behavioral of top is
                    btns : in  std_logic_vector(C_NR_BTNS-1 downto 0);
                    leds : out std_logic_vector(C_NR_LEDS-1 downto 0);
                     seg : out std_logic_vector(6 downto 0);
-                     an : out std_logic_vector(3 downto 0)
+                     an : out std_logic_vector(3 downto 0);
+                    rgb : out std_logic_vector(2 downto 0)
     );
     end component;
 begin
@@ -166,6 +171,10 @@ begin
     
     an <= "1111" & an_i;
     seg <= seg_i;
+    
+    RGB1_Red <= rgb_i(0);
+    RGB1_Green <= rgb_i(1);
+    RGB1_Blue <= rgb_i(2);
    
     -- processor reset
     reset_i <= not btnCpuReset;
@@ -278,7 +287,8 @@ begin
                    btns => btns_i,
                    leds => leds_i,
                     seg => seg_i,
-                     an => an_i
+                     an => an_i,
+                    rgb => rgb_i
     );
 
 end Behavioral;
