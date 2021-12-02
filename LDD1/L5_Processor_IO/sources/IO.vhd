@@ -53,12 +53,13 @@ entity IO is
                    btns : in  std_logic_vector(C_NR_BTNS-1 downto 0);
                    leds : out std_logic_vector(C_NR_LEDS-1 downto 0);
                     seg : out std_logic_vector(6 downto 0);
-                     an : out std_logic_vector(3 downto 0)
+                     an : out std_logic_vector(3 downto 0);
+                    rgb : out std_logic_vector(2 downto 0)
     );
 end IO;
 
 architecture Behavioral of IO is
-    constant C_PERIPHERAL_COUNT : natural := 9;
+    constant C_PERIPHERAL_COUNT : natural := 10;
     
     constant C_7SEG_INDEX   : natural := 0;
     constant C_LEDS_INDEX   : natural := 1;
@@ -69,27 +70,25 @@ architecture Behavioral of IO is
     constant C_IRQ_F_INDEX  : natural := 6;
     constant C_UART_INDEX   : natural := 7;
     constant C_CRCC_INDEX   : natural := 8;
+    constant C_PWM_INDEX    : natural := 9;
 
     constant C_LEDS_REGISTER_COUNT : natural := 2;
     constant C_7SEG_REGISTER_COUNT : natural := 4;
     constant C_SW_REGISTER_COUNT   : natural := 2;
-
-    constant C_LEDS_ADDR_WIDTH : natural := nb_bit_req(C_LEDS_REGISTER_COUNT);
-    constant C_7SEG_ADDR_WIDTH : natural := nb_bit_req(C_7SEG_REGISTER_COUNT);
+    constant C_PWM_REGISTER_COUNT  : natural := 4; -- only 3 used?
     
-
+   -- constant C_LEDS_ADDR_WIDTH : natural := nb_bit_req(C_LEDS_REGISTER_COUNT);
+   -- constant C_7SEG_ADDR_WIDTH : natural := nb_bit_req(C_7SEG_REGISTER_COUNT);
+    
     signal read_en_all  : std_logic_vector(C_PERIPHERAL_COUNT-1 downto 0);
     signal write_en_all : std_logic_vector(C_PERIPHERAL_COUNT-1 downto 0);
     signal rw_en_all : std_logic_vector(C_PERIPHERAL_COUNT-1 downto 0);
     
     signal ready_all : std_logic_vector(C_PERIPHERAL_COUNT-1 downto 0);
     signal ready_i   : std_logic_vector(0 downto 0);
-    
-    
-    
+
     signal data_bus_out_all : std_logic_vector((C_PERIPHERAL_COUNT*C_DATA_WIDTH)-1 downto 0);
     
-   
     constant C_IRQ_COUNT : natural := 4;
     -- irq bit numbers
     constant C_IRQ_BTNS  : natural := 0;
@@ -115,18 +114,15 @@ architecture Behavioral of IO is
     constant C_BTNS_ADDR  : std_logic_vector(address_bus'range) := C_ADDR_PREFI & "101000";
     constant C_SW_ADDR    : std_logic_vector(address_bus'range) := C_ADDR_PREFI & "100000";
     constant C_TMR1S_ADDR : std_logic_vector(address_bus'range) := C_ADDR_PREFI & "011000";
+    constant C_PWM_ADDR   : std_logic_vector(address_bus'range) := C_ADDR_PREFI & "010000";
     constant C_IRQ_E_ADDR : std_logic_vector(address_bus'range) := C_ADDR_PREFI & "000000";
     constant C_IRQ_F_ADDR : std_logic_vector(address_bus'range) := C_ADDR_PREFI & "000001";
     
-    
     signal leds_reg_i      : std_logic_vector(C_LEDS_REGISTER_COUNT*C_DATA_WIDTH-1 downto 0) := (others=>'0');
-    
     signal bcd_reg_i       : std_logic_vector(15 downto 0) := (others=>'0');
-    
     signal tmr1s_ctrl_reg_i: std_logic_vector(C_DATA_WIDTH-1 downto 0) := (others=>'0');
-    
-
-    
+    signal pwm_reg_i       : std_logic_vector(31 downto 0) := (others=>'0');
+  
     component Driver_7seg_4 is
     generic(
          C_F_CLK : natural := 50000000 -- system clock frequency
@@ -140,6 +136,20 @@ architecture Behavioral of IO is
          bcd3 : in  std_logic_vector(3 downto 0);
           seg : out std_logic_vector(6 downto 0);
            an : out std_logic_vector(3 downto 0)
+    );
+    end component;
+    
+    component driver_pwm_rgb_single is
+    generic(
+         C_F_CLK : natural := 50000000 -- system clock frequency
+    );
+    port(
+          clk : in  std_logic;
+        reset : in  std_logic;
+         regR : in  std_logic_vector(7 downto 0);
+         regG : in  std_logic_vector(7 downto 0);
+         regB : in  std_logic_vector(7 downto 0);
+          rgb : out std_logic_vector(2 downto 0)
     );
     end component;
     
@@ -186,7 +196,7 @@ architecture Behavioral of IO is
            C_ADDR_BASE : std_logic_vector := x"F0"; 
            
            C_DATA_BUS_WIDTH : natural := 8;
-           C_DATA_REG_WIDTH : natural :=8;
+           C_DATA_REG_WIDTH : natural := 8;
            C_REGISTER_COUNT : natural := 8;
            
            ENABLE_DIRECT_INPUT : natural:= 1 -- 1 for input
@@ -307,7 +317,6 @@ begin
 
     
     -- LEDs IO module --------------------------------------------------------------  
-    
     LED_REGISTERS : generic_peripheral
           generic map(
              C_ADDR_BASE => C_LEDS_ADDR,
@@ -339,8 +348,8 @@ begin
               write_en_peri => write_en_all(C_LEDS_INDEX)
          );
     leds <= leds_reg_i(leds'range);--connect the register to the external leds
-    -- 7 segment driver module -----------------------------------------------------
-
+    
+    -- 7 segment IO module -----------------------------------------------------
     SEG7_REGISTERS: generic_peripheral
           generic map(
              C_ADDR_BASE => C_7SEG_ADDR,
@@ -372,7 +381,6 @@ begin
               write_en_peri => write_en_all(C_7SEG_INDEX)
          );
     
-    
     -- 7 segment driver module
     DISP_SEG_DRIVER : Driver_7seg_4
     generic map(
@@ -389,6 +397,41 @@ begin
           an => an
     );    
     
+    -- PWM IO module -----------------------------------------------------
+    PWM_REGISTERS: generic_peripheral
+      generic map(
+         C_ADDR_BASE => C_PWM_ADDR,
+         
+         C_DATA_BUS_WIDTH => C_DATA_WIDTH,
+         C_DATA_REG_WIDTH => C_DATA_WIDTH,
+         C_REGISTER_COUNT => C_PWM_REGISTER_COUNT,
+         
+         ENABLE_DIRECT_INPUT => 0
+     )
+     port map(
+        clk => clk,
+        reset => reset,
+          
+        direct_in => (others => '0'),
+        direct_out => pwm_reg_i, --bcd_register
+          
+        --bus accessi
+        data_in => data_bus_in,
+        data_out => data_bus_out_all(((C_PWM_INDEX+1) * C_DATA_WIDTH)-1 downto C_PWM_INDEX*C_DATA_WIDTH),
+        
+        addr => address_bus,
+        read_en => read_en,
+        write_en => write_en,
+        
+        ready => ready_all(C_PWM_INDEX),
+                      
+        read_en_peri => read_en_all(C_PWM_INDEX),
+        write_en_peri => write_en_all(C_PWM_INDEX)
+     );
+
+    
+    -- PWM driver module
+        -- TODO: add the module
 
     -- BTNs IO module --------------------------------------------------------------
        BTNS_REGISTERS: debounced_input_peripheral
@@ -427,39 +470,39 @@ begin
     btns_reg_in_i(btns'range) <= btns;
          
     -- SWs IO module ---------------------------------------------------------------
-       SW_REGISTERS: debounced_input_peripheral
-           generic map(
-              C_ADDR_BASE => C_SW_ADDR,
-              
-              C_DATA_BUS_WIDTH => C_DATA_WIDTH,
-              C_DATA_REG_WIDTH => C_DATA_WIDTH,
-              C_REGISTER_COUNT => C_SW_REGISTER_COUNT,
-              
-              C_F_CLK => C_F_CLK,    -- system clock frequency
-              C_DELAY_MS => C_DELAY_MS -- debounce period
-              
-          )
-          port map(
-             clk => clk,
-             reset => reset,
-               
-             direct_in => sw_reg_in_i,
-             direct_out => sw_reg_i, --bcd_register
-               
-             --bus access
-             data_in => data_bus_in,
-             data_out => data_bus_out_all(((C_SW_INDEX+1)*C_DATA_WIDTH)-1 downto C_SW_INDEX*C_DATA_WIDTH),
-             
-             addr => address_bus,
-             read_en => read_en,
-             write_en => write_en,
-             
-             ready => ready_all(C_SW_INDEX),
-                             
-             read_en_peri => read_en_all(C_SW_INDEX),
-             write_en_peri => write_en_all(C_SW_INDEX),
-             irq => irq_f_i(C_IRQ_SW)
-          );
+   SW_REGISTERS: debounced_input_peripheral
+       generic map(
+          C_ADDR_BASE => C_SW_ADDR,
+          
+          C_DATA_BUS_WIDTH => C_DATA_WIDTH,
+          C_DATA_REG_WIDTH => C_DATA_WIDTH,
+          C_REGISTER_COUNT => C_SW_REGISTER_COUNT,
+          
+          C_F_CLK => C_F_CLK,    -- system clock frequency
+          C_DELAY_MS => C_DELAY_MS -- debounce period
+          
+      )
+      port map(
+         clk => clk,
+         reset => reset,
+           
+         direct_in => sw_reg_in_i,
+         direct_out => sw_reg_i, --bcd_register
+           
+         --bus access
+         data_in => data_bus_in,
+         data_out => data_bus_out_all(((C_SW_INDEX+1)*C_DATA_WIDTH)-1 downto C_SW_INDEX*C_DATA_WIDTH),
+         
+         addr => address_bus,
+         read_en => read_en,
+         write_en => write_en,
+         
+         ready => ready_all(C_SW_INDEX),
+                         
+         read_en_peri => read_en_all(C_SW_INDEX),
+         write_en_peri => write_en_all(C_SW_INDEX),
+         irq => irq_f_i(C_IRQ_SW)
+      );
    sw_reg_in_i(sw'range) <= sw;
    
     -- Timer 1 second -------------------------------------------------------------
