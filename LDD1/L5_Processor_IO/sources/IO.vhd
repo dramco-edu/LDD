@@ -141,7 +141,8 @@ architecture Behavioral of IO is
     
     component driver_pwm_rgb_single is
     generic(
-         C_F_CLK : natural := 50000000 -- system clock frequency
+         C_F_CLK : natural := 50000000; -- system clock frequency
+       C_F_COUNT : natural := 250000    -- internal 8-bit counter frequency
     );
     port(
           clk : in  std_logic;
