@@ -73,7 +73,7 @@ architecture Behavioral of ADD_tb is
     end component;
    
        --debug information
-    type debug_t is (reseting, paused, ADD_NC, ADD_NC2, ADD_C1, ADD_C2, ended);
+    type debug_t is (reseting, paused, ADD_NC, ADD_NC2, ADD_C, FULL, ended);
     signal debug : debug_t;
     
 begin
@@ -90,11 +90,12 @@ begin
         carry_out => carry_out
     );
     
-        STIM_PROC: process
+    STIM_PROC: process
         variable s : line;
+        variable result_v : std_logic_vector(C_DATA_WIDTH downto 0);
     begin
     
-        -- test 1
+        -- addition (no carry)
         wait for 10 ns;
         debug <= ADD_NC;
         a <= x"3";
@@ -102,68 +103,80 @@ begin
         wait for 1 ns;
         assert result = x"4"
             report "ADD without carry failed (result)"
-            severity ERROR;
+            severity FAILURE;
         assert carry_out = '0'
             report "ADD without carry failed (carry_out)"
-            severity ERROR;
+            severity FAILURE;
         if (result = x"4") and (carry_out = '0') then
             write (s, string'("SUCCESS: ADD without carry."));
             writeline (output, s);
         end if;
     
-        -- test 2
+        -- addition with carry in (no carry)
         wait for 10 ns;
         debug <= ADD_NC2;
         carry_in <= '1';
         wait for 1 ns;
         assert result = x"5"
             report "ADD+carry_in without carry failed (result)"
-            severity ERROR;
+            severity FAILURE;
         assert carry_out = '0'
             report "ADD+carry_in without carry failed (carry_out)"
-            severity ERROR;
+            severity FAILURE;
         if (result = x"5") and (carry_out = '0') then
             write (s, string'("SUCCESS: ADD+carry_in without carry."));
             writeline (output, s);
         end if;
             
-        -- test 3
+        -- add (no carry)
         wait for 10 ns;
-        debug <= ADD_C1;
-        carry_in <= '0';
-        a <= x"C";
-        b <= x"4";
-        wait for 1 ns;
-        wait for 1 ns;
-        assert result = x"0"
-            report "ADD with carry failed (result)"
-            severity ERROR;
-        assert carry_out = '1'
-            report "ADD with carry failed (carry_out)"
-            severity ERROR; 
-        if (result = x"0") and (carry_out = '1') then
-            write (s, string'("SUCCESS: ADD with carry."));
-            writeline (output, s);
-        end if;
-                   
-        -- test 4
-        wait for 10 ns;
-        debug <= ADD_C2;
-        carry_in <= '1';
+        debug <= ADD_C;
         a <= x"7";
         b <= x"8";
         wait for 1 ns;
-        wait for 1 ns;
         assert result = x"0"
-            report "ADD+carry_in with carry failed (result)"
-            severity ERROR;
+            report "ADD with carry failed (result)"
+            severity FAILURE;
         assert carry_out = '1'
-            report "ADD+carry_in with carry failed (carry_out)"
-            severity ERROR; 
+            report "ADD with carry failed (carry_out)"
+            severity FAILURE; 
         if (result = x"0") and (carry_out = '1') then
-            write (s, string'("SUCCESS: ADD+carry_in with carry."));
+            write (s, string'("SUCCESS: ADD with carry."));
             writeline (output, s);
-        end if;    
+        end if;     
+        
+        -- full range test
+        wait for 10 ns;
+        debug <= FULL;
+        for i in 0 to 15 loop
+            for j in 0 to 15 loop
+                --  without carry in
+                carry_in <= '0';
+                a <= std_logic_vector(to_unsigned(i, C_DATA_WIDTH));
+                b <= std_logic_vector(to_unsigned(j, C_DATA_WIDTH));
+                result_v := std_logic_vector(to_unsigned((i+j), C_DATA_WIDTH+1));
+                wait for 1 ns;
+                assert result = result_v(C_DATA_WIDTH-1 downto 0)
+                    report "Full test failed (result)"
+                    severity FAILURE;
+                assert carry_out = result_v(C_DATA_WIDTH)
+                    report "Full test failed (carry_out)"
+                    severity FAILURE; 
+            
+                --  with carry in
+                carry_in <= '1';
+                a <= std_logic_vector(to_unsigned(i, C_DATA_WIDTH));
+                b <= std_logic_vector(to_unsigned(j, C_DATA_WIDTH));
+                result_v := std_logic_vector(to_unsigned((i+j+1), C_DATA_WIDTH+1));
+                wait for 1 ns;
+                assert result = result_v(C_DATA_WIDTH-1 downto 0)
+                    report "Full test failed (result)"
+                    severity FAILURE;
+                assert carry_out = result_v(C_DATA_WIDTH)
+                    report "Full test failed (carry_out)"
+                    severity FAILURE; 
+            end loop;
+        end loop; 
         
         -- end simulation           
         wait for 10 ns;
