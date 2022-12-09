@@ -1,0 +1,102 @@
+Copyright 1986-2021 Xilinx, Inc. All Rights Reserved.
+------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2021.1 (lin64) Build 3247384 Thu Jun 10 19:36:07 MDT 2021
+| Date         : Wed Nov  9 15:34:56 2022
+| Host         : b230-PC05 running 64-bit Ubuntu 20.04.4 LTS
+| Command      : report_control_sets -verbose -file top_control_sets_placed.rpt
+| Design       : top
+| Device       : xc7a100t
+------------------------------------------------------------------------------------
+
+Control Set Information
+
+Table of Contents
+-----------------
+1. Summary
+2. Histogram
+3. Flip-Flop Distribution
+4. Detailed Control Set Information
+
+1. Summary
+----------
+
++----------------------------------------------------------+-------+
+|                          Status                          | Count |
++----------------------------------------------------------+-------+
+| Total control sets                                       |    24 |
+|    Minimum number of control sets                        |    24 |
+|    Addition due to synthesis replication                 |     0 |
+|    Addition due to physical synthesis replication        |     0 |
+| Unused register locations in slices containing registers |    79 |
++----------------------------------------------------------+-------+
+* Control sets can be merged at opt_design using control_set_merge or merge_equivalent_drivers
+** Run report_qor_suggestions for automated merging and remapping suggestions
+
+
+2. Histogram
+------------
+
++--------------------+-------+
+|       Fanout       | Count |
++--------------------+-------+
+| Total control sets |    24 |
+| >= 0 to < 4        |     2 |
+| >= 4 to < 6        |     5 |
+| >= 6 to < 8        |     2 |
+| >= 8 to < 10       |     4 |
+| >= 10 to < 12      |     1 |
+| >= 12 to < 14      |     1 |
+| >= 14 to < 16      |     0 |
+| >= 16              |     9 |
++--------------------+-------+
+* Control sets can be remapped at either synth_design or opt_design
+
+
+3. Flip-Flop Distribution
+-------------------------
+
++--------------+-----------------------+------------------------+-----------------+--------------+
+| Clock Enable | Synchronous Set/Reset | Asynchronous Set/Reset | Total Registers | Total Slices |
++--------------+-----------------------+------------------------+-----------------+--------------+
+| No           | No                    | No                     |             123 |           42 |
+| No           | No                    | Yes                    |               0 |            0 |
+| No           | Yes                   | No                     |              52 |           17 |
+| Yes          | No                    | No                     |              16 |            8 |
+| Yes          | No                    | Yes                    |               0 |            0 |
+| Yes          | Yes                   | No                     |             114 |           29 |
++--------------+-----------------------+------------------------+-----------------+--------------+
+
+
+4. Detailed Control Set Information
+-----------------------------------
+
++----------------+------------------------------------------------------------+------------------------------------------------------------+------------------+----------------+--------------+
+|  Clock Signal  |                        Enable Signal                       |                      Set/Reset Signal                      | Slice Load Count | Bel Load Count | Bels / Slice |
++----------------+------------------------------------------------------------+------------------------------------------------------------+------------------+----------------+--------------+
+|  clk_IBUF_BUFG |                                                            |                                                            |                1 |              1 |         1.00 |
+|  clk50_MHz     | processor/flag_enable                                      | processor/internal_reset                                   |                1 |              2 |         2.00 |
+|  clk50_MHz     | processor/data_path_loop[0].output_data.sy_kk_mux_lut_2[0] |                                                            |                2 |              4 |         2.00 |
+|  clk50_MHz     | processor/data_path_loop[0].output_data.sy_kk_mux_lut_1[0] |                                                            |                2 |              4 |         2.00 |
+|  clk50_MHz     | processor/data_path_loop[0].output_data.sy_kk_mux_lut_0[0] |                                                            |                2 |              4 |         2.00 |
+|  clk50_MHz     | processor/E[0]                                             |                                                            |                2 |              4 |         2.00 |
+|  clk50_MHz     |                                                            | baud_count[4]_i_1_n_0                                      |                1 |              5 |         5.00 |
+|  clk50_MHz     |                                                            | processor/active_interrupt                                 |                2 |              6 |         3.00 |
+|  clk50_MHz     |                                                            | processor/internal_reset                                   |                3 |              6 |         2.00 |
+|  clk50_MHz     | rx/buffer_write                                            |                                                            |                2 |              8 |         4.00 |
+|  clk50_MHz     |                                                            | program_rom/instruction[7]                                 |                3 |              8 |         2.67 |
+|  clk50_MHz     | processor/buffer_write                                     |                                                            |                1 |              8 |         8.00 |
+|  clk50_MHz     | processor/spm_enable                                       |                                                            |                2 |              8 |         4.00 |
+|  clk50_MHz     |                                                            | processor/buffer_reset                                     |                3 |             10 |         3.33 |
+|  clk50_MHz     | processor/WE                                               | processor/internal_reset                                   |                3 |             12 |         4.00 |
+|  clk50_MHz     | processor/WE                                               |                                                            |                2 |             16 |         8.00 |
+|  clk50_MHz     | processor/register_enable                                  |                                                            |                2 |             16 |         8.00 |
+|  clk50_MHz     |                                                            | display/REFRESH_CLK_PROC.cntr_i[17]_i_1_n_0                |                5 |             17 |         3.40 |
+|  clk50_MHz     | debounce_btns/DEBOUNCED_VECTOR[1].DEBOUNCERS/counter       | debounce_btns/DEBOUNCED_VECTOR[1].DEBOUNCERS/reset_counter |                5 |             20 |         4.00 |
+|  clk50_MHz     | debounce_btns/DEBOUNCED_VECTOR[4].DEBOUNCERS/counter       | debounce_btns/DEBOUNCED_VECTOR[4].DEBOUNCERS/reset_counter |                5 |             20 |         4.00 |
+|  clk50_MHz     | debounce_btns/DEBOUNCED_VECTOR[0].DEBOUNCERS/counter       | debounce_btns/DEBOUNCED_VECTOR[0].DEBOUNCERS/reset_counter |                5 |             20 |         4.00 |
+|  clk50_MHz     | debounce_btns/DEBOUNCED_VECTOR[3].DEBOUNCERS/counter       | debounce_btns/DEBOUNCED_VECTOR[3].DEBOUNCERS/reset_counter |                5 |             20 |         4.00 |
+|  clk50_MHz     | debounce_btns/DEBOUNCED_VECTOR[2].DEBOUNCERS/counter       | debounce_btns/DEBOUNCED_VECTOR[2].DEBOUNCERS/reset_counter |                5 |             20 |         4.00 |
+|  clk50_MHz     |                                                            |                                                            |               41 |            122 |         2.98 |
++----------------+------------------------------------------------------------+------------------------------------------------------------+------------------+----------------+--------------+
+
+

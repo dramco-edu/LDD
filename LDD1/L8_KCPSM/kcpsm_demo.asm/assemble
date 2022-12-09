@@ -1,0 +1,1 @@
+opbasm -i program.psm -t ROM_form.vhd -6 -s 64 -m 2048

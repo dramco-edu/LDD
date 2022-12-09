@@ -1,0 +1,283 @@
+                      ; kcpsm_demo program
+
+                      ;
+                      ;------------------------------------------------------------------------------------------
+                      ; Copyright © 2011-2012, Xilinx, Inc.
+                      ; This file contains confidential and proprietary information of Xilinx, Inc. and is
+                      ; protected under U.S. and international copyright and other intellectual property laws.
+                      ;------------------------------------------------------------------------------------------
+                      ;
+                      ; Disclaimer:
+                      ; This disclaimer is not a license and does not grant any rights to the materials
+                      ; distributed herewith. Except as otherwise provided in a valid license issued to
+                      ; you by Xilinx, and to the maximum extent permitted by applicable law: (1) THESE
+                      ; MATERIALS ARE MADE AVAILABLE "AS IS" AND WITH ALL FAULTS, AND XILINX HEREBY
+                      ; DISCLAIMS ALL WARRANTIES AND CONDITIONS, EXPRESS, IMPLIED, OR STATUTORY,
+                      ; INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, NON-INFRINGEMENT,
+                      ; OR FITNESS FOR ANY PARTICULAR PURPOSE; and (2) Xilinx shall not be liable
+                      ; (whether in contract or tort, including negligence, or under any other theory
+                      ; of liability) for any loss or damage of any kind or nature related to, arising
+                      ; under or in connection with these materials, including for any direct, or any
+                      ; indirect, special, incidental, or consequential loss or damage (including loss
+                      ; of data, profits, goodwill, or any type of loss or damage suffered as a result
+                      ; of any action brought by a third party) even if such damage or loss was
+                      ; reasonably foreseeable or Xilinx had been advised of the possibility of the same.
+                      ;
+                      ; CRITICAL APPLICATIONS
+                      ; Xilinx products are not designed or intended to be fail-safe, or for use in any
+                      ; application requiring fail-safe performance, such as life-support or safety
+                      ; devices or systems, Class III medical devices, nuclear facilities, applications
+                      ; related to the deployment of airbags, or any other applications that could lead
+                      ; to death, personal injury, or severe property or environmental damage
+                      ; (individually and collectively, "Critical Applications"). Customer assumes the
+                      ; sole risk and liability of any use of Xilinx products in Critical Applications,
+                      ; subject only to applicable laws and regulations governing limitations on product
+                      ; liability.
+                      ;
+                      ; THIS COPYRIGHT NOTICE AND DISCLAIMER MUST BE RETAINED AS PART OF THIS FILE AT ALL TIMES.
+                      ;
+                      ;------------------------------------------------------------------------------------------
+                      ;
+                      ;
+                      ;             _  ______ ____  ____  __  __  __
+                      ;            | |/ / ___|  _ \/ ___||  \/  |/ /_
+                      ;            | ' / |   | |_) \___ \| |\/| | '_ \
+                      ;            | . \ |___|  __/ ___) | |  | | (_) )
+                      ;            |_|\_\____|_|   |____/|_|  |_|\___/
+                      ;
+                      ;
+                      ;                PicoBlaze Reference Design.
+                      ;
+                      ;
+                      ; Routines for General Purpose I2C Communication
+                      ;
+                      ; Ken Chapman - Xilinx Ltd
+                      ;
+                      ; 9th March 2012 - Initial Version
+                      ; 12th October 2012 - Adjustments to values assigned to constant directives
+                      ; 16th October 2012 - Code optimisation (lowest level signal drive routines)
+                      ; 25th October 2012 - Correct definition of a binary value (functionally identical)
+                      ; 6th November 2012 - Correction to comment only
+                      ;
+                      ;
+                      ;     NOTE - This is not a standalone PSM file. Include this file in a program that
+                      ;            then calls these routines and works with the values in scratch pad memory.
+                      ;
+                      ;                INCLUDE "i2c_routines.psm"
+                      ;
+                      ;
+                      ;     IMPORTANT - These routines interact with input and output ports which must
+                      ;                 be appropriately defined to drive and read the physical I2C
+                      ;                 signals. Four CONSTANT directives must define values consistent
+                      ;                 with your port definitions and a further CONSTANT must be defined
+                      ;                 that is related to the frequency of the clock being applied to
+                      ;                 KCPSM6 in your design (Please see descriptions below).
+                      ;
+                      ;
+
+                      ; input port addresses
+                      CONSTANT uart_status_port, 80
+                      CONSTANT uart_rx_port, 81
+                      CONSTANT btns_port, 40
+
+                      ; output port addresses
+                      CONSTANT uart_tx_port, 80
+                      CONSTANT uart_reset_port, 1
+                      CONSTANT bcd_0_port, 40
+                      CONSTANT bcd_1_port, 41
+                      CONSTANT bcd_2_port, 42
+                      CONSTANT bcd_3_port, 43
+
+                      ; btns bit positions
+                      CONSTANT btnU, 00010000'b
+                      CONSTANT btnR, 00001000'b
+                      CONSTANT btnD, 00000100'b
+                      CONSTANT btnL, 00000010'b
+                      CONSTANT btnC, 00000001'b
+
+                      ; uart status bit positions
+                      CONSTANT uart_rx_data_present, 00001000'b
+                      CONSTANT uart_tx_full, 00000100'b
+
+                      ; uart buffer
+                      CONSTANT buffer_fill_address, 20
+
+                      ; names for registers
+                      NAMEREG sc, bcd_0
+                      NAMEREG sd, bcd_1
+                      NAMEREG se, bcd_2
+                      NAMEREG sf, bcd_3
+                      NAMEREG s7, uart
+
+                      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                      ; setup code ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                      ADDRESS 000
+          cold_start: ; reset uart rx and tx
+                      OUTPUTK 01, uart_reset_port
+                      ; initialize buffer_fill location to 0
+                      LOAD s8, 00
+                      STORE s8, buffer_fill_address
+                      ; set registers for storing bcd values to a default value
+                      LOAD bcd_0, 00
+                      LOAD bcd_1, 00
+                      LOAD bcd_2, 00
+                      LOAD bcd_3, 00
+                      ; update the 7 segment display (should show 0000)
+                      CALL update_display
+                      ; enable interrupts
+                      ENABLE interrupt
+
+                      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                      ; main loop ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                loop: ; read a char
+                      CALL uart_read_char
+                      ; check if there's something in the buffer
+                      FETCH s8, buffer_fill_address
+                      COMPARE s8, 04
+                      JUMP Z, code_received          ; there's nothing in the buffer
+                      JUMP loop
+       code_received: ; there is something in the buffer
+                      ; if we got here we got a new "code" (4 bytes) in the buffer
+                      ; get the code
+                      FETCH bcd_0, 00
+                      FETCH bcd_1, 01
+                      FETCH bcd_2, 02
+                      FETCH bcd_3, 03
+                      ; "clear" the buffer
+                      LOAD s8, 00
+                      STORE s8, buffer_fill_address
+                      ; update the display with the new code
+                      CALL update_display
+                      JUMP loop
+
+                      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                      ; subroutines ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+                      ; read a single character from the uart (with timeout) and put it in RAM
+                      ; registers used: s0, s8, uart
+      uart_read_char: LOAD s0, 00
+      urc_no_timeout: ADDCY s0, 01
+                      JUMP C, urc_end
+                      INPUT uart, uart_status_port
+                      TEST uart, uart_rx_data_present
+                      JUMP Z, urc_no_timeout
+                      INPUT uart, uart_rx_port
+                      FETCH s8, buffer_fill_address
+                      STORE uart, (s8)
+                      ADD s8, 01
+                      STORE s8, buffer_fill_address
+             urc_end: RETURN
+
+
+                      ; Software delay of 1 second
+                      ;
+                      ; KCPSM reference designe is fitted with a 50MHz clock.
+                      ; 1 second is 50,000,000 clock cycles.
+                      ; KCPSM6 will execute 25,000,000 instructions.
+                      ;
+                      ; The delay loop below decrements the 24-bit value held
+                      ; in registers [s2,s1,s0] until it reaches zero and this
+                      ; loop consists of 4 instructions.
+                      ;
+                      ; Therefore the loop needs to count 6,250,000 times so
+                      ; the start value is 5F5E10 hex.
+                      ;
+            delay_1s: LOAD s2, 5F
+                      LOAD s1, 5E
+                      LOAD s0, 10
+          delay_loop: SUB s0, 1'd
+                      SUBCY s1, 0'd
+                      SUBCY s2, 0'd
+                      JUMP NZ, delay_loop
+                      RETURN
+
+                      ; write the contents of s5 to the uart
+                      ; registers uses: s0 and s5
+     uart_write_byte: INPUT s0, uart_status_port     ; Check if buffer is full
+                      TEST s0, uart_tx_full
+                      JUMP NZ, uart_write_byte       ; wait if full
+                      OUTPUT s5, uart_tx_port
+                      RETURN
+
+       transmit_code: LOAD s5, bcd_0
+                      CALL uart_write_byte
+                      LOAD s5, bcd_1
+                      CALL uart_write_byte
+                      LOAD s5, bcd_2
+                      CALL uart_write_byte
+                      LOAD s5, bcd_3
+                      CALL uart_write_byte
+                      RETURN
+
+      update_display: OUTPUT bcd_0, bcd_0_port
+                      OUTPUT bcd_1, bcd_1_port
+                      OUTPUT bcd_2, bcd_2_port
+                      OUTPUT bcd_3, bcd_3_port
+                      RETURN
+
+     shift_bcds_left: LOAD s4, bcd_3
+                      LOAD bcd_3, bcd_2
+                      LOAD bcd_2, bcd_1
+                      LOAD bcd_1, bcd_0
+                      LOAD bcd_0, s4
+                      RETURN
+
+    shift_bcds_right: LOAD s4, bcd_0
+                      LOAD bcd_0, bcd_1
+                      LOAD bcd_1, bcd_2
+                      LOAD bcd_2, bcd_3
+                      LOAD bcd_3, s4
+                      RETURN
+
+              incBCD: ADD bcd_0, 01
+                      COMPARE bcd_0, 0A
+                      JUMP Z, inc_overflow
+                      RETURN
+        inc_overflow: LOAD bcd_0, 00
+                      RETURN
+
+              decBCD: COMPARE bcd_0, 00
+                      JUMP Z, dec_underflow
+                      SUB bcd_0, 01
+                      RETURN
+       dec_underflow: LOAD bcd_0, 09
+                      RETURN
+
+                      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                      ; interrupt implementation ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+                      ; test which button was pressed and execute the corresponding action
+             isr_imp: INPUT s5, btns_port
+               testU: TEST s5, btnU
+                      JUMP Z, testD
+                      CALL incBCD
+                      RETURN
+               testD: TEST s5, btnD
+                      JUMP Z, testL
+                      CALL decBCD
+                      RETURN
+               testL: TEST s5, btnL
+                      JUMP Z, testR
+                      CALL shift_bcds_left
+                      RETURN
+               testR: TEST s5, btnR
+                      JUMP Z, execC
+                      CALL shift_bcds_right
+                      RETURN
+               execC: CALL transmit_code
+                      RETURN
+
+                      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                      ; interrupt vector is on address 7f0
+                      ; we don't have enough room to write a complete isr so we call it
+                      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                      ADDRESS 7F0
+                 ISR: CALL isr_imp
+                      CALL update_display
+                      RETURNI enable
+
+
