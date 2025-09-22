@@ -43,8 +43,8 @@ architecture Behavioral of ALU8bit is
     -- ALU_OP_XOR  
     -- ALU_OP_ADD  
     -- ALU_OP_CMP  
-    -- ALU_OP_RR   
-    -- ALU_OP_RL   
+    -- ALU_OP_SR   
+    -- ALU_OP_SL   
     -- ALU_OP_SWAP 
 
     -- operation results
@@ -53,8 +53,8 @@ architecture Behavioral of ALU8bit is
     signal and_result_i  : std_logic_vector(C_DATA_WIDTH-1 downto 0) := (others=>'0');
     signal or_result_i   : std_logic_vector(C_DATA_WIDTH-1 downto 0) := (others=>'0');
     signal xor_result_i  : std_logic_vector(C_DATA_WIDTH-1 downto 0) := (others=>'0');
-    signal rr_result_i   : std_logic_vector(C_DATA_WIDTH-1 downto 0) := (others=>'0');
-    signal rl_result_i   : std_logic_vector(C_DATA_WIDTH-1 downto 0) := (others=>'0');
+    signal sr_result_i   : std_logic_vector(C_DATA_WIDTH-1 downto 0) := (others=>'0');
+    signal sl_result_i   : std_logic_vector(C_DATA_WIDTH-1 downto 0) := (others=>'0');
     signal add_result_i  : std_logic_vector(C_DATA_WIDTH-1 downto 0) := (others=>'0');
     signal swap_result_i : std_logic_vector(C_DATA_WIDTH-1 downto 0) := (others=>'0');
     -- help signals
@@ -88,10 +88,10 @@ begin
     xor_result_i <= ... ;
     -- not
     not_result_i <= ... ;
-    -- rr
-    rr_result_i <= ... ;
-    -- rl
-    rl_result_i <= ... ;
+    -- sr
+    sr_result_i <= ... ;
+    -- sl
+    sl_result_i <= ... ;
     -- swap
     swap_result_i <= ; 
     
