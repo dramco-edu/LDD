@@ -61,8 +61,8 @@ architecture Behavioral of ALU_tb is
     constant ALU_OP_ADD  : std_logic_vector(3 downto 0) := "0101";
     constant ALU_OP_SUB  : std_logic_vector(3 downto 0) := "0110";
     constant ALU_OP_CMP  : std_logic_vector(3 downto 0) := "0111";
-    constant ALU_OP_RR   : std_logic_vector(3 downto 0) := "1000";
-    constant ALU_OP_RL   : std_logic_vector(3 downto 0) := "1001";
+    constant ALU_OP_SR   : std_logic_vector(3 downto 0) := "1000";
+    constant ALU_OP_SL   : std_logic_vector(3 downto 0) := "1001";
     constant ALU_OP_SWAP : std_logic_vector(3 downto 0) := "1010";
 
 
@@ -344,7 +344,7 @@ begin
         debug <= OP_RR_C;
         X <= x"D7";
         Y <= x"FF";
-        op <= ALU_OP_RR;
+        op <= ALU_OP_SR;
         wait for 1 ns;
         assert Z = x"6B"
            report "SR with carry failed (result)"
@@ -362,7 +362,7 @@ begin
         debug <= OP_RR_NC;
         X <= x"D6";
         Y <= x"FF";
-        op <= ALU_OP_RR;
+        op <= ALU_OP_SR;
         wait for 1 ns;
         assert Z = x"6B"
            report "SR without carry failed (result)"
@@ -380,7 +380,7 @@ begin
         debug <= OP_Rl_C;
         X <= x"D7";
         Y <= x"FF";
-        op <= ALU_OP_RL;
+        op <= ALU_OP_SL;
         wait for 1 ns;
         assert Z = x"AE"
            report "SL with carry failed (result)"
@@ -398,7 +398,7 @@ begin
         debug <= OP_RL_NC;
         X <= x"57";
         Y <= x"FF";
-        op <= ALU_OP_RL;
+        op <= ALU_OP_SL;
         wait for 1 ns;
         assert Z = x"AE"
            report "SL without carry failed (result)"
