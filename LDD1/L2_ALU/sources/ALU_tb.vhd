@@ -339,7 +339,7 @@ begin
             writeline (output, s);
         end if;
         
-        -- rr carry
+        -- sr carry
         wait for 10 ns;
         debug <= OP_RR_C;
         X <= x"D7";
@@ -347,17 +347,17 @@ begin
         op <= ALU_OP_RR;
         wait for 1 ns;
         assert Z = x"6B"
-           report "RR with carry failed (result)"
+           report "SR with carry failed (result)"
            severity ERROR;
         assert cf = '1'
-            report "RR with carry failed (cf)"
+            report "SR with carry failed (cf)"
             severity ERROR;
         if (Z = x"6B") and (zf = '0') and (cf = '1') then
-            write (s, string'("SUCCESS: RR 1."));
+            write (s, string'("SUCCESS: SR 1."));
             writeline (output, s);
         end if;
                     
-        -- rr no carry
+        -- sr no carry
         wait for 10 ns;
         debug <= OP_RR_NC;
         X <= x"D6";
@@ -365,17 +365,17 @@ begin
         op <= ALU_OP_RR;
         wait for 1 ns;
         assert Z = x"6B"
-           report "RR without carry failed (result)"
+           report "SR without carry failed (result)"
            severity ERROR; 
         assert cf = '0'
-            report "RR without carry failed (cf)"
+            report "SR without carry failed (cf)"
             severity ERROR;
         if (Z = x"6B") and (zf = '0') and (cf = '0') then
-            write (s, string'("SUCCESS: RR 2."));
+            write (s, string'("SUCCESS: SR 2."));
             writeline (output, s);
         end if;
                     
-        -- rl carry
+        -- sl carry
         wait for 10 ns;
         debug <= OP_Rl_C;
         X <= x"D7";
@@ -383,17 +383,17 @@ begin
         op <= ALU_OP_RL;
         wait for 1 ns;
         assert Z = x"AE"
-           report "RL with carry failed (result)"
+           report "SL with carry failed (result)"
            severity ERROR;
         assert cf = '1'
-            report "RL with carry failed (cf)"
+            report "SL with carry failed (cf)"
             severity ERROR;
         if (Z = x"AE") and (zf = '0') and (cf = '1') then
-            write (s, string'("SUCCESS: RL 1."));
+            write (s, string'("SUCCESS: SL 1."));
             writeline (output, s);
         end if;
                    
-        -- rl no carry
+        -- sl no carry
         wait for 10 ns;
         debug <= OP_RL_NC;
         X <= x"57";
@@ -401,13 +401,13 @@ begin
         op <= ALU_OP_RL;
         wait for 1 ns;
         assert Z = x"AE"
-           report "RL without carry failed (result)"
+           report "SL without carry failed (result)"
            severity ERROR;
         assert cf = '0'
-            report "RL without carry failed (cf)"
+            report "SL without carry failed (cf)"
             severity ERROR;
         if (Z = x"AE") and (zf = '0') and (cf = '0') then
-            write (s, string'("SUCCESS: RL 2."));
+            write (s, string'("SUCCESS: SL 2."));
             writeline (output, s);
         end if;
                     
