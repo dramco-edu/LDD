@@ -61,7 +61,7 @@ architecture Behavioral of data_path_tb is
     
     
     --debug information
-    type debug_t is (resetting, DIBR_to_R0, PC_to_R2, SP_to_R4, IR_to_R6, IV_to_R7, SWAP_R7, NOT_R1, RL_R1, RR_R2, 
+    type debug_t is (resetting, DIBR_to_R0, PC_to_R2, SP_to_R4, IR_to_R6, IV_to_R7, SWAP_R7, NOT_R1, SL_R1, SR_R2, 
                      CMP_R6_R4, CMP_R4_R6, SUB_R6_R4, MOV_R4_TO_R3, ended);
     signal debug : debug_t;
     
@@ -329,8 +329,8 @@ begin
         reg_file_le <= '0';
         
         -- rl R1
-        debug <= RL_R1;
-        alu_op <= ALU_OP_RL;
+        debug <= SL_R1;
+        alu_op <= ALU_OP_SL;
         cpu_bus_sel <= GP_REG;
         Rsource <= REGFILE_R1;
         flags_le <= '1';
@@ -344,21 +344,21 @@ begin
         reg_file_le <= '1';
         wait for 2 ns;
         assert cpu_bus = x"FE"
-            report "cpu bus selection error (alu output) or alu operation error (RL)"
+            report "cpu bus selection error (alu output) or alu operation error (SL)"
             severity ERROR;
         assert flags(3) = '1'
-            report "carry flag not set on alu operation (RL)"
+            report "carry flag not set on alu operation (SL)"
             severity ERROR;
         if (cpu_bus = x"FE") and (flags(3)='1') then
-            write (s, string'("SUCCESS: alu RL operation and cpu bus selection (alu output)"));
+            write (s, string'("SUCCESS: alu SL operation and cpu bus selection (alu output)"));
             writeline (output, s);
         end if;
         wait until falling_edge(clk);
         reg_file_le <= '0';
         
         -- rr R2
-        debug <= RR_R2;
-        alu_op <= ALU_OP_RR;
+        debug <= SR_R2;
+        alu_op <= ALU_OP_SR;
         cpu_bus_sel <= GP_REG;
         Rsource <= REGFILE_R2;
         flags_le <= '1';
@@ -372,16 +372,16 @@ begin
         reg_file_le <= '1';
         wait for 2 ns;
         assert cpu_bus = x"00"
-            report "cpu bus selection error (alu output) or alu operation error (RL)"
+            report "cpu bus selection error (alu output) or alu operation error (SR)"
             severity ERROR;
         assert flags(3) = '1'
-            report "carry flag not set on alu operation (RR)"
+            report "carry flag not set on alu operation (SR)"
             severity ERROR;
         assert flags(4) = '1'
-            report "zero flag not set on alu operation (RR)"
+            report "zero flag not set on alu operation (SR)"
             severity ERROR;
         if (cpu_bus = x"00") and (flags(3)='1') and (flags(4)='1') then
-            write (s, string'("SUCCESS: alu RL operation and cpu bus selection (alu output)"));
+            write (s, string'("SUCCESS: alu SR operation and cpu bus selection (alu output)"));
             writeline (output, s);
         end if;
         wait until falling_edge(clk);
