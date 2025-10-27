@@ -42,8 +42,8 @@ package processor_pkg is
     constant OPCODE_POP  : std_logic_vector(4 downto 0) := "01111";
    
     constant OPCODE_NOT  : std_logic_vector(4 downto 0) := "10000";
-    constant OPCODE_RR   : std_logic_vector(4 downto 0) := "10001";
-    constant OPCODE_RL   : std_logic_vector(4 downto 0) := "10010";
+    constant OPCODE_SR   : std_logic_vector(4 downto 0) := "10001";
+    constant OPCODE_SL   : std_logic_vector(4 downto 0) := "10010";
     constant OPCODE_SWAP : std_logic_vector(4 downto 0) := "10011";    
     
     constant OPCODE_ANDL : std_logic_vector(4 downto 0) := "10100";
@@ -68,8 +68,8 @@ package processor_pkg is
     constant ALU_OP_ADD  : std_logic_vector(3 downto 0) := "0101";
     constant ALU_OP_SUB  : std_logic_vector(3 downto 0) := "0110";
     constant ALU_OP_CMP  : std_logic_vector(3 downto 0) := "0111";
-    constant ALU_OP_RR   : std_logic_vector(3 downto 0) := "1000";
-    constant ALU_OP_RL   : std_logic_vector(3 downto 0) := "1001";
+    constant ALU_OP_SR   : std_logic_vector(3 downto 0) := "1000";
+    constant ALU_OP_SL   : std_logic_vector(3 downto 0) := "1001";
     constant ALU_OP_SWAP : std_logic_vector(3 downto 0) := "1010";
         
     -- register file register selection
