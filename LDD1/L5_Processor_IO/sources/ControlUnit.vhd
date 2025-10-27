@@ -327,8 +327,8 @@ begin
                           C_EC3_ADDR  when OPCODE_STR,  -- STR  -> EC3 
                           C_EC4_ADDR  when OPCODE_LDR,  -- LDR  -> EC4 
                           C_EC5_ADDR  when OPCODE_NOT,  -- NOT  -> EC5 
-                          C_EC5_ADDR  when OPCODE_RR,   -- RR   -> EC5 
-                          C_EC5_ADDR  when OPCODE_RL,   -- RL   -> EC5 
+                          C_EC5_ADDR  when OPCODE_SR,   -- SR   -> EC5 
+                          C_EC5_ADDR  when OPCODE_SL,   -- SL   -> EC5 
                           C_EC5_ADDR  when OPCODE_SWAP, -- SWAP -> EC5 
                           C_EC6_ADDR  when OPCODE_ANDL, -- ANDL -> EC6 
                           C_EC6_ADDR  when OPCODE_ORL,  -- ORL  -> EC6 
@@ -450,8 +450,8 @@ begin
     -- alu
     with opcode_i select
     alu_op_i <= ALU_OP_NOT  when OPCODE_NOT,
-                ALU_OP_RR   when OPCODE_RR,
-                ALU_OP_RL   when OPCODE_RL,
+                ALU_OP_SR   when OPCODE_SR,
+                ALU_OP_SL   when OPCODE_SL,
                 ALU_OP_AND  when OPCODE_ANDL,
                 ALU_OP_AND  when OPCODE_ANDR,
                 ALU_OP_OR   when OPCODE_ORL,
