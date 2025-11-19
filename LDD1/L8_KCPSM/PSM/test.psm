@@ -61,7 +61,7 @@
                       ;
                       ;
                       ;     NOTE - This is not a standalone PSM file. Include this file in a program that
-                      ;            then calls these routines and works with the values in scratch pad memory.
+                      ;            then CALLs these routines and works with the values in scratch pad memory.
                       ;
                       ;                INCLUDE "i2c_routines.psm"
                       ;
@@ -125,31 +125,17 @@
                       LOAD bcd_3, 00
                       ; update the 7 segment display (should show 0000)
                       CALL update_display
-                      ; enable interrupts
-                      enable interrupt
+                      ; ENABLE INTERRUPTs
+                      ENABLE INTERRUPT
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;                     
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;                     
 ; main loop ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
                 loop: ; read a char
-                      CALL uart_read_char
-                      ; check if there's something in the buffer
-                      FETCH s8, buffer_fill_address
-                      COMPARE s8, 04
-                      JUMP Z, code_received ; there's nothing in the buffer
-                      JUMP loop
-       code_received: ; there is something in the buffer
-                      ; if we got here we got a new "code" (4 bytes) in the buffer
-                      ; get the code
-                      FETCH bcd_0, 00
-                      FETCH bcd_1, 01
-                      FETCH bcd_2, 02
-                      FETCH bcd_3, 03
-                      ; "clear" the buffer
-                      LOAD s8, 00
-                      STORE s8, buffer_fill_address
-                      ; update the display with the new code
-                      call update_display
+					  CALL delay_1s
+					  CALL incBCD
+                      CALL update_display
                       JUMP loop
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -273,11 +259,11 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; interrupt vector is on address 7f0 
-; we don't have enough room to write a complete isr so we call it
+; we don't have enough room to write a complete isr so we CALL it
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
                       ADDRESS 7F0
                  ISR: CALL isr_imp
                       CALL update_display
-                      RETURNI enable
+                      RETURNI ENABLE
 
 

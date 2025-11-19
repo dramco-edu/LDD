@@ -265,12 +265,6 @@ set_property PACKAGE_PIN V10 [get_ports btnD]
 
 
 ##Pmod Header JC
-#Bank = 35, Pin name = IO_L23P_T3_35,						Sch name = JC1
-set_property PACKAGE_PIN K2 [get_ports {uart_rx}]					
-	set_property IOSTANDARD LVCMOS33 [get_ports {uart_rx}]
-#Bank = 35, Pin name = IO_L6P_T0_35,						Sch name = JC2
-set_property PACKAGE_PIN E7 [get_ports {uart_tx}]					
-	set_property IOSTANDARD LVCMOS33 [get_ports {uart_tx}]
 ##Bank = 35, Pin name = IO_L23P_T3_35,						Sch name = JC1
 #set_property PACKAGE_PIN K2 [get_ports {JC[0]}]					
 #	set_property IOSTANDARD LVCMOS33 [get_ports {JC[0]}]
@@ -728,7 +722,7 @@ set_property PACKAGE_PIN E7 [get_ports {uart_tx}]
 	
 
 # UART PINS
-#set_property PACKAGE_PIN D4 [get_ports Tx]
-#set_property IOSTANDARD LVCMOS33 [get_ports Tx]
-#set_property PACKAGE_PIN C4 [get_ports Rx]
-#set_property IOSTANDARD LVCMOS33 [get_ports Rx]
+set_property PACKAGE_PIN D4 [get_ports {uart_tx}]
+set_property IOSTANDARD LVCMOS33 [get_ports {uart_tx}]
+set_property PACKAGE_PIN C4 [get_ports {uart_rx}]
+set_property IOSTANDARD LVCMOS33 [get_ports {uart_rx}]
